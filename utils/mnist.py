@@ -2,6 +2,7 @@ import cv2
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 
 def load_mnist(mnist_path: str, binary_images: bool = False, shuffle: bool = True):
@@ -10,8 +11,7 @@ def load_mnist(mnist_path: str, binary_images: bool = False, shuffle: bool = Tru
     :return: the images and the labels
     """
 
-    y = []
-    X = []
+    dataset = []
 
     for label in os.listdir(mnist_path):
         for image_name in os.listdir(os.path.join(mnist_path, label)):
@@ -22,17 +22,14 @@ def load_mnist(mnist_path: str, binary_images: bool = False, shuffle: bool = Tru
                 image[image > 128] = 255
                 image[image <= 128] = 0
 
-            X.append(image / 255.0)
-            y.append(int(label))
-
-    X = np.array(X)
-    y = np.array(y)
+            img = np.array(image, dtype=np.float32) / 255.0
+            y = int(label)
+            dataset.append((img, y))
 
     if shuffle:
-        idx = np.random.permutation(len(X))
-        X, y = X[idx], y[idx]
+        random.shuffle(dataset)
 
-    return X, y
+    return dataset
 
 
 def plot_images(images):
@@ -43,7 +40,7 @@ def plot_images(images):
     fig, axs = plt.subplots(1, len(images), figsize=(34, 10))
 
     for i, img in enumerate(images):
-        axs[i].imshow(img, cmap="gray")
+        axs[i].imshow(img[0], cmap="gray")
         axs[i].axis("off")
 
     plt.show()
